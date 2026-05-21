@@ -1,0 +1,105 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 30 25% 98%;
+    --foreground: 215 25% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 15%;
+
+    --primary: 175 70% 32%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 215 25% 95%;
+    --secondary-foreground: 215 25% 20%;
+
+    --muted: 215 20% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 175 55% 95%;
+    --accent-foreground: 175 70% 22%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 215 20% 90%;
+    --input: 215 20% 90%;
+    --ring: 175 70% 32%;
+
+    --success: 152 60% 36%;
+    --success-foreground: 0 0% 100%;
+    --success-soft: 152 55% 94%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 38 80% 15%;
+    --warning-soft: 48 96% 93%;
+
+    --danger: 0 72% 51%;
+    --danger-foreground: 0 0% 100%;
+    --danger-soft: 0 85% 96%;
+
+    --radius: 0.875rem;
+  }
+
+  .dark {
+    --background: 215 30% 8%;
+    --foreground: 30 25% 96%;
+    --card: 215 28% 11%;
+    --card-foreground: 30 25% 96%;
+    --popover: 215 28% 11%;
+    --popover-foreground: 30 25% 96%;
+    --primary: 175 65% 45%;
+    --primary-foreground: 215 28% 11%;
+    --secondary: 215 25% 16%;
+    --secondary-foreground: 30 25% 96%;
+    --muted: 215 25% 14%;
+    --muted-foreground: 215 15% 65%;
+    --accent: 175 40% 18%;
+    --accent-foreground: 175 65% 90%;
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 215 25% 18%;
+    --input: 215 25% 18%;
+    --ring: 175 65% 45%;
+    --success: 152 55% 45%;
+    --success-soft: 152 30% 15%;
+    --warning: 38 85% 55%;
+    --warning-soft: 38 30% 16%;
+    --danger: 0 70% 55%;
+    --danger-soft: 0 30% 18%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html,
+  body {
+    @apply bg-background text-foreground antialiased;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 9999px;
+  }
+  .safe-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom), 0.5rem);
+  }
+}
