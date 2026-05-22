@@ -16,6 +16,7 @@ export const goals: Goal[] = [
     deadline: inMonths(10),
     status: "al-dia",
     emoji: "🛟",
+    accountId: "a3",
   },
   {
     id: "g2",
@@ -26,6 +27,7 @@ export const goals: Goal[] = [
     deadline: inMonths(5),
     status: "atrasado",
     emoji: "🏔️",
+    accountId: "a4",
   },
   {
     id: "g3",
@@ -36,6 +38,7 @@ export const goals: Goal[] = [
     deadline: inMonths(8),
     status: "al-dia",
     emoji: "🛠️",
+    accountId: "a6",
   },
   {
     id: "g4",
@@ -46,5 +49,6 @@ export const goals: Goal[] = [
     deadline: inMonths(12),
     status: "atrasado",
     emoji: "🧊",
+    accountId: "a7",
   },
 ];

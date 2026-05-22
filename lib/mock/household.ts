@@ -1,10 +1,7 @@
-import type { Household, HouseholdMember } from "@/lib/types";
+import type { Household } from "@/lib/types";
+import { members } from "@/lib/mock/members";
 
-export const members: HouseholdMember[] = [
-  { id: "m1", name: "Camila", role: "Administrador", avatarColor: "#0d9488", initials: "CM" },
-  { id: "m2", name: "Martín", role: "Miembro", avatarColor: "#0f766e", initials: "MR" },
-  { id: "m3", name: "Lucía", role: "Miembro", avatarColor: "#65a30d", initials: "LU" },
-];
+export { members };
 
 export const household: Household = {
   id: "h1",
