@@ -1,11 +1,14 @@
+"use client";
+
 import Link from "next/link";
 import { Calendar, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { bills } from "@/lib/mock/bills";
+import { useBills } from "@/lib/store/app-store";
 import { cn, daysUntil, formatCurrency, formatDate } from "@/lib/utils";
 
 export function UpcomingBillsList({ limit = 4 }: { limit?: number }) {
+  const bills = useBills();
   const list = [...bills]
     .filter((b) => b.status !== "pagado")
     .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())

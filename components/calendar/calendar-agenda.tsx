@@ -1,9 +1,11 @@
+"use client";
+
 import { AlertCircle, Calendar, CheckCircle2, Clock, Wrench } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { bills } from "@/lib/mock/bills";
-import { tasks } from "@/lib/mock/tasks";
+import { useBills, useTasks } from "@/lib/store/app-store";
 import { maintenanceItems } from "@/lib/mock/maintenance";
+import type { Bill, HouseholdTask } from "@/lib/types";
 import { cn, daysUntil, formatCurrency, formatLongDate } from "@/lib/utils";
 
 type AgendaItem = {
@@ -23,7 +25,7 @@ const statusMeta = {
   vencido: { label: "Vencido", variant: "danger" as const, icon: AlertCircle },
 };
 
-function buildAgenda(): AgendaItem[] {
+function buildAgenda(bills: Bill[], tasks: HouseholdTask[]): AgendaItem[] {
   const items: AgendaItem[] = [];
 
   bills.forEach((b) => {
@@ -86,7 +88,9 @@ function groupByDate(items: AgendaItem[]) {
 }
 
 export function CalendarAgenda() {
-  const agenda = groupByDate(buildAgenda());
+  const bills = useBills();
+  const tasks = useTasks();
+  const agenda = groupByDate(buildAgenda(bills, tasks));
 
   return (
     <Card>

@@ -1,15 +1,17 @@
 "use client";
 
-import { useState } from "react";
 import { Plus, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { shoppingList } from "@/lib/mock/shopping";
+import { useActions } from "@/components/forms/action-context";
+import { useAppStore } from "@/lib/store/app-store";
 import { cn, formatCurrency } from "@/lib/utils";
 
 export function ShoppingListCard() {
-  const [items, setItems] = useState(shoppingList);
+  const { state, toggleShoppingItem } = useAppStore();
+  const { open } = useActions();
+  const items = state.shopping;
   const total = items.filter((i) => !i.bought).reduce((acc, i) => acc + i.estimatedPrice, 0);
   const pendientes = items.filter((i) => !i.bought).length;
 
@@ -25,7 +27,7 @@ export function ShoppingListCard() {
               {pendientes} ítems pendientes · estimado {formatCurrency(total)}
             </p>
           </div>
-          <Button size="sm" variant="soft" className="text-xs">
+          <Button size="sm" variant="soft" className="text-xs" onClick={() => open("shopping")}>
             <Plus className="h-3.5 w-3.5" /> Sumar
           </Button>
         </div>
@@ -35,11 +37,7 @@ export function ShoppingListCard() {
           <button
             key={item.id}
             type="button"
-            onClick={() =>
-              setItems((prev) =>
-                prev.map((i) => (i.id === item.id ? { ...i, bought: !i.bought } : i)),
-              )
-            }
+            onClick={() => toggleShoppingItem(item.id)}
             className="w-full flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-muted/50 transition-colors text-left"
           >
             <span

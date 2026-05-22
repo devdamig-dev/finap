@@ -1,10 +1,15 @@
+"use client";
+
 import { AlertCircle, BellRing, TrendingUp } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { getExpenseByCategory, getMonthlySummary } from "@/lib/ai/recommendations";
-import { subscriptions, transactions } from "@/lib/mock/transactions";
+import { subscriptions } from "@/lib/mock/transactions";
+import { useTransactions } from "@/lib/store/app-store";
 import { cn, formatCurrency } from "@/lib/utils";
 
 export function FinanceAlerts() {
+  const all = useTransactions();
+  const transactions = all.filter((t) => t.scope !== "personal");
   const { fixedShare, totalIncome, totalFixed } = getMonthlySummary(transactions);
   const byCat = getExpenseByCategory(transactions);
   const delivery = byCat.find((c) => c.category === "Delivery")?.amount ?? 0;

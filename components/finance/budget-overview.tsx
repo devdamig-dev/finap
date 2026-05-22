@@ -1,7 +1,9 @@
+"use client";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { getExpenseByCategory, getMonthlySummary } from "@/lib/ai/recommendations";
-import { transactions } from "@/lib/mock/transactions";
+import { useTransactions } from "@/lib/store/app-store";
 import { formatCurrency } from "@/lib/utils";
 
 const budgets: Record<string, number> = {
@@ -15,6 +17,8 @@ const budgets: Record<string, number> = {
 };
 
 export function BudgetOverview() {
+  const all = useTransactions();
+  const transactions = all.filter((t) => t.scope !== "personal");
   const byCat = getExpenseByCategory(transactions);
   const { totalIncome, totalExpense } = getMonthlySummary(transactions);
   const monthBudget = Math.round(totalIncome * 0.85);

@@ -1,3 +1,5 @@
+"use client";
+
 import { PiggyBank, ShieldCheck } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -8,13 +10,15 @@ import {
   savingPockets,
 } from "@/lib/mock/savings";
 import { getMonthlySummary } from "@/lib/ai/recommendations";
-import { householdTransactions } from "@/lib/mock/transactions";
+import { useTransactions } from "@/lib/store/app-store";
 import { cn, formatCurrency } from "@/lib/utils";
 
 const EMERGENCY_TARGET_MONTHS = 3;
 
 export function SavingsMini() {
-  const { savingRate } = getMonthlySummary(householdTransactions);
+  const all = useTransactions();
+  const household = all.filter((t) => t.scope !== "personal");
+  const { savingRate } = getMonthlySummary(household);
   const ratePct = Math.round(savingRate * 100);
   const months = getEmergencyFundCoverageMonths();
   const coveragePct = Math.min(100, Math.round((months / EMERGENCY_TARGET_MONTHS) * 100));

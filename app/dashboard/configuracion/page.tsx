@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Bell,
   Crown,
@@ -17,7 +19,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
-import { accounts } from "@/lib/mock/accounts";
+import { useToast } from "@/components/feedback/toast-provider";
+import { useActions } from "@/components/forms/action-context";
+import { useAccounts, useAppStore, usePrivacy } from "@/lib/store/app-store";
 import { household } from "@/lib/mock/household";
 import { householdFinancialProfile, personalBudgets } from "@/lib/mock/members";
 import type { FinancialProfile } from "@/lib/types";
@@ -59,6 +63,11 @@ const profileDescriptions: Record<FinancialProfile, string> = {
 };
 
 export default function ConfiguracionPage() {
+  const { open } = useActions();
+  const accounts = useAccounts();
+  const privacy = usePrivacy();
+  const { setPrivacy } = useAppStore();
+  const toast = useToast();
   return (
     <div className="space-y-5 animate-fade-in">
       <PageHeader
@@ -133,7 +142,7 @@ export default function ConfiguracionPage() {
               <p className="text-sm font-semibold tabular-nums">{formatCurrency(a.balance)}</p>
             </div>
           ))}
-          <Button variant="soft" size="sm" className="w-full">
+          <Button variant="soft" size="sm" className="w-full" onClick={() => open("account")}>
             Agregar cuenta o bolsillo
           </Button>
         </CardContent>
@@ -152,7 +161,13 @@ export default function ConfiguracionPage() {
               {categorias.map((c) => (
                 <Badge key={c} variant="secondary" className="text-xs">{c}</Badge>
               ))}
-              <Badge variant="outline" className="text-xs cursor-pointer">+ Nueva</Badge>
+              <Badge
+                variant="outline"
+                className="text-xs cursor-pointer hover:bg-muted"
+                onClick={() => toast.info("Próximamente", "Vas a poder crear categorías propias.")}
+              >
+                + Nueva
+              </Badge>
             </div>
           </div>
           <div>
@@ -161,7 +176,13 @@ export default function ConfiguracionPage() {
               {categoriasPersonales.map((c) => (
                 <Badge key={c} variant="outline" className="text-xs">{c}</Badge>
               ))}
-              <Badge variant="outline" className="text-xs cursor-pointer">+ Nueva</Badge>
+              <Badge
+                variant="outline"
+                className="text-xs cursor-pointer hover:bg-muted"
+                onClick={() => toast.info("Próximamente", "Vas a poder crear categorías propias.")}
+              >
+                + Nueva
+              </Badge>
             </div>
           </div>
         </CardContent>
@@ -224,11 +245,23 @@ export default function ConfiguracionPage() {
         <CardContent className="space-y-1">
           <ToggleRow
             label="Gastos personales visibles para todo el hogar"
-            defaultChecked={false}
-            hint="Si lo desactivás, sólo el administrador ve los gastos personales de cada integrante."
+            checked={privacy.personalDetailsVisible}
+            onCheckedChange={(v) => {
+              setPrivacy({ personalDetailsVisible: v });
+              toast.info(v ? "Detalle personal visible" : "Detalle personal privado");
+            }}
+            hint="Si lo desactivás, en Finanzas y Dashboard sólo se ven totales agregados. Cada integrante siempre ve su detalle en Mis gastos."
           />
           <Separator />
-          <ToggleRow label="Compartir totales agregados con todos los integrantes" defaultChecked />
+          <ToggleRow
+            label="Compartir totales agregados con todos los integrantes"
+            checked={privacy.shareAggregates}
+            onCheckedChange={(v) => {
+              setPrivacy({ shareAggregates: v });
+              toast.info(v ? "Totales por integrante visibles" : "Sólo total general");
+            }}
+            hint="Si lo desactivás, se muestra sólo el total general del hogar, sin desglose por integrante."
+          />
           <Separator />
           <ToggleRow label="Permitir análisis anónimo para mejorar la IA" defaultChecked />
         </CardContent>
@@ -299,10 +332,14 @@ function Row({ label, value, actionLabel }: { label: string; value: string; acti
 function ToggleRow({
   label,
   defaultChecked,
+  checked,
+  onCheckedChange,
   hint,
 }: {
   label: string;
   defaultChecked?: boolean;
+  checked?: boolean;
+  onCheckedChange?: (v: boolean) => void;
   hint?: string;
 }) {
   return (
@@ -311,7 +348,11 @@ function ToggleRow({
         <p className="text-sm">{label}</p>
         {hint && <p className="text-[11px] text-muted-foreground mt-0.5">{hint}</p>}
       </div>
-      <Switch defaultChecked={defaultChecked} />
+      {checked !== undefined ? (
+        <Switch checked={checked} onCheckedChange={onCheckedChange} />
+      ) : (
+        <Switch defaultChecked={defaultChecked} />
+      )}
     </div>
   );
 }

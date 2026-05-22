@@ -1,9 +1,11 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowRight, Check, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { tasks } from "@/lib/mock/tasks";
-import type { TaskStatus } from "@/lib/types";
+import { useTasks } from "@/lib/store/app-store";
+import type { HouseholdTask, TaskStatus } from "@/lib/types";
 import { cn, daysUntil, formatDate } from "@/lib/utils";
 
 const statusStyles: Record<TaskStatus, { label: string; variant: "warning" | "info" | "success" | "danger" }> = {
@@ -13,13 +15,14 @@ const statusStyles: Record<TaskStatus, { label: string; variant: "warning" | "in
   vencido: { label: "Vencido", variant: "danger" },
 };
 
-function deriveStatus(t: (typeof tasks)[number]): TaskStatus {
+function deriveStatus(t: HouseholdTask): TaskStatus {
   if (t.status === "completado") return "completado";
   if (t.dueDate && daysUntil(t.dueDate) < 0) return "vencido";
   return t.status;
 }
 
 export function HouseholdTasksList({ limit = 4 }: { limit?: number }) {
+  const tasks = useTasks();
   const list = tasks
     .filter((t) => t.status !== "completado")
     .sort((a, b) => (a.dueDate ?? "").localeCompare(b.dueDate ?? ""))

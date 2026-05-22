@@ -3,7 +3,7 @@
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getExpenseByCategory } from "@/lib/ai/recommendations";
-import { transactions } from "@/lib/mock/transactions";
+import { useTransactions } from "@/lib/store/app-store";
 import { formatCurrency } from "@/lib/utils";
 
 const palette = [
@@ -20,7 +20,10 @@ const palette = [
 ];
 
 export function ExpenseCategoryChart() {
-  const data = getExpenseByCategory(transactions).slice(0, 8);
+  const all = useTransactions();
+  // Sólo movimientos del hogar (no personales)
+  const household = all.filter((t) => t.scope !== "personal");
+  const data = getExpenseByCategory(household).slice(0, 8);
   const total = data.reduce((acc, d) => acc + d.amount, 0);
 
   return (

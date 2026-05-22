@@ -4,7 +4,7 @@ import { ExpenseCategoryChart } from "@/components/dashboard/expense-category-ch
 import { FinancialHealthCard } from "@/components/dashboard/financial-health-card";
 import { GoalsOverview } from "@/components/dashboard/goals-overview";
 import { HouseholdTasksList } from "@/components/dashboard/household-tasks-list";
-import { PersonalExpensesMini } from "@/components/dashboard/personal-expenses-mini";
+import { PersonalAggregatedCard } from "@/components/finance/personal-aggregated-card";
 import { QuickActions } from "@/components/dashboard/quick-actions";
 import { SavingsMini } from "@/components/dashboard/savings-mini";
 import { UpcomingBillsList } from "@/components/dashboard/upcoming-bills-list";
@@ -50,7 +50,7 @@ export default function DashboardPage() {
         <div className="space-y-4">
           <UpcomingBillsList limit={4} />
           <GoalsOverview limit={2} />
-          <PersonalExpensesMini />
+          <PersonalAggregatedCard compact />
         </div>
       </div>
 

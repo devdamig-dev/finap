@@ -1,11 +1,16 @@
+"use client";
+
 import { FileText, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { documents } from "@/lib/mock/documents";
+import { useActions } from "@/components/forms/action-context";
+import { useDocuments } from "@/lib/store/app-store";
 import { daysUntil, formatDate } from "@/lib/utils";
 
 export function DocumentsCard() {
+  const documents = useDocuments();
+  const { open } = useActions();
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -18,7 +23,7 @@ export function DocumentsCard() {
               Carnés, pólizas y comprobantes al alcance
             </p>
           </div>
-          <Button size="sm" variant="soft" className="text-xs">
+          <Button size="sm" variant="soft" className="text-xs" onClick={() => open("document")}>
             <Upload className="h-3.5 w-3.5" /> Subir
           </Button>
         </div>

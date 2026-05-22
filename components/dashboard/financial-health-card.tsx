@@ -1,11 +1,15 @@
+"use client";
+
 import { Activity, CheckCircle2, TriangleAlert } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { getHouseholdHealth, getMonthlySummary } from "@/lib/ai/recommendations";
-import { transactions } from "@/lib/mock/transactions";
+import { useTransactions } from "@/lib/store/app-store";
 import { cn, formatCurrency } from "@/lib/utils";
 
 export function FinancialHealthCard() {
+  const all = useTransactions();
+  const transactions = all.filter((t) => t.scope !== "personal");
   const health = getHouseholdHealth(transactions);
   const { totalIncome, totalExpense } = getMonthlySummary(transactions);
   const used = totalIncome > 0 ? Math.min(100, Math.round((totalExpense / totalIncome) * 100)) : 0;

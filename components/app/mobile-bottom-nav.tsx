@@ -3,15 +3,15 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { navItems } from "./nav-items";
+import { mobileNavItems } from "./nav-items";
 
 export function MobileBottomNav() {
   const pathname = usePathname();
 
   return (
     <nav className="lg:hidden fixed bottom-0 inset-x-0 z-30 border-t bg-background/95 backdrop-blur safe-bottom">
-      <ul className="grid grid-cols-6">
-        {navItems.map((item) => {
+      <ul className="grid grid-cols-5">
+        {mobileNavItems.map((item) => {
           const Icon = item.icon;
           const active =
             item.href === "/dashboard"
