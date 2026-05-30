@@ -3,8 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Sparkles } from "lucide-react";
+import { APP_VERSION, APP_VERSION_LABEL } from "@/lib/app-version";
 import { cn } from "@/lib/utils";
 import { navItems } from "./nav-items";
+
+const NEW_HREFS = new Set(["/dashboard/mis-gastos"]);
 
 export function DesktopSidebar() {
   const pathname = usePathname();
@@ -27,6 +30,7 @@ export function DesktopSidebar() {
             item.href === "/dashboard"
               ? pathname === "/dashboard"
               : pathname.startsWith(item.href);
+          const isNew = NEW_HREFS.has(item.href);
           return (
             <Link
               key={item.href}
@@ -39,18 +43,26 @@ export function DesktopSidebar() {
               )}
             >
               <Icon className="h-4 w-4" />
-              {item.label}
+              <span className="flex-1">{item.label}</span>
+              {isNew && (
+                <span className="text-[9px] uppercase tracking-wide bg-primary text-primary-foreground rounded-full px-1.5 py-0.5 font-bold">
+                  Nuevo
+                </span>
+              )}
             </Link>
           );
         })}
       </nav>
-      <div className="px-3 py-4 border-t">
+      <div className="px-3 py-4 border-t space-y-2">
         <div className="rounded-xl bg-accent/60 p-3">
           <p className="text-xs font-semibold text-accent-foreground">Plan Gratis</p>
           <p className="text-xs text-muted-foreground mt-0.5">
             Probá HogarIA Plus para sumar IA real y notificaciones.
           </p>
         </div>
+        <p className="text-[10px] text-muted-foreground text-center font-mono">
+          {APP_VERSION} · {APP_VERSION_LABEL}
+        </p>
       </div>
     </aside>
   );

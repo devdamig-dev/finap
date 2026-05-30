@@ -1,11 +1,16 @@
+"use client";
+
 import { ArrowDownRight, ArrowUpRight, Wallet } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { transactions } from "@/lib/mock/transactions";
+import { useTransactions } from "@/lib/store/app-store";
 import { getMonthlySummary } from "@/lib/ai/recommendations";
 import { cn, formatCurrency } from "@/lib/utils";
 
 export function DashboardSummary() {
-  const { totalIncome, totalExpense, balance } = getMonthlySummary(transactions);
+  const transactions = useTransactions();
+  // El resumen del hogar no incluye gastos personales individuales
+  const household = transactions.filter((t) => t.scope !== "personal");
+  const { totalIncome, totalExpense, balance } = getMonthlySummary(household);
 
   const items = [
     {
@@ -16,7 +21,7 @@ export function DashboardSummary() {
       bg: "bg-success-soft",
     },
     {
-      label: "Gastos",
+      label: "Gastos del hogar",
       value: totalExpense,
       icon: ArrowDownRight,
       color: "text-[hsl(var(--danger))]",

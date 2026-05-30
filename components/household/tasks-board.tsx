@@ -1,11 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Check, Clock, CircleDot, AlertCircle } from "lucide-react";
+import { Check, Clock, CircleDot, AlertCircle, Plus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { tasks as mockTasks } from "@/lib/mock/tasks";
+import { useActions } from "@/components/forms/action-context";
+import { useAppStore } from "@/lib/store/app-store";
 import type { HouseholdTask, TaskStatus } from "@/lib/types";
 import { cn, daysUntil, formatDate } from "@/lib/utils";
 
@@ -29,11 +31,12 @@ function deriveStatus(t: HouseholdTask): TaskStatus {
 
 export function TasksBoard() {
   const [filter, setFilter] = useState<"todas" | TaskStatus>("todas");
+  const { state, toggleTask } = useAppStore();
+  const { open } = useActions();
 
   const grouped = useMemo(() => {
-    const list = mockTasks.map((t) => ({ ...t, status: deriveStatus(t) }));
-    return list;
-  }, []);
+    return state.tasks.map((t) => ({ ...t, status: deriveStatus(t) }));
+  }, [state.tasks]);
 
   const visible = filter === "todas" ? grouped : grouped.filter((t) => t.status === filter);
 
@@ -45,6 +48,9 @@ export function TasksBoard() {
             <CardTitle>Tareas del hogar</CardTitle>
             <p className="text-xs text-muted-foreground">Asignadas a cada integrante</p>
           </div>
+          <Button size="sm" variant="soft" onClick={() => open("task")}>
+            <Plus className="h-3.5 w-3.5" /> Crear tarea
+          </Button>
         </div>
         <Tabs value={filter} onValueChange={(v) => setFilter(v as typeof filter)} className="mt-3">
           <TabsList className="flex-wrap h-auto bg-muted/60">
@@ -74,6 +80,7 @@ export function TasksBoard() {
               <button
                 type="button"
                 aria-label="Marcar como hecho"
+                onClick={() => toggleTask(task.id)}
                 className={cn(
                   "h-5 w-5 mt-0.5 rounded-md border flex items-center justify-center shrink-0",
                   task.status === "completado"
