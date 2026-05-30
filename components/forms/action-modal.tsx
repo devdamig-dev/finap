@@ -22,7 +22,7 @@ const TITLES = {
   "personal-expense": { title: "Agregar gasto personal", description: "Sólo vos vas a ver este gasto en detalle." },
   task: { title: "Crear tarea", description: "Asignala a alguien del hogar." },
   bill: { title: "Agregar vencimiento", description: "Servicios, cuotas, resúmenes." },
-  shopping: { title: "Nueva compra", description: "Sumá un ítem a la lista del hogar." },
+  shopping: { title: "Nueva compra prevista", description: "Cargá una compra grande o recurrente (por bloque, no producto por producto)." },
   document: { title: "Sumar factura o documento", description: "Mantené todo lo importante a mano." },
   account: { title: "Agregar cuenta o bolsillo", description: "Dónde el hogar guarda y mueve la plata." },
 } as const;

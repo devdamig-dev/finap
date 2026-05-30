@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/app/page-header";
 import { Button } from "@/components/ui/button";
 import { DocumentsCard } from "@/components/household/documents-card";
 import { MaintenanceList } from "@/components/household/maintenance-list";
-import { ShoppingListCard } from "@/components/household/shopping-list-card";
+import { PlannedPurchasesCard } from "@/components/household/planned-purchases-card";
 import { TasksBoard } from "@/components/household/tasks-board";
 import { useActions } from "@/components/forms/action-context";
 
@@ -25,7 +25,7 @@ export default function HogarPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <TasksBoard />
-        <ShoppingListCard />
+        <PlannedPurchasesCard />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

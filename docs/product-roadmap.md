@@ -66,6 +66,22 @@ Entregable: aplicación usable de punta a punta con datos reales.
 - Carga de documentos del hogar con OCR (vencimientos, pólizas).
 - Recordatorios automáticos por vencimiento de documento.
 
+### Detalle producto-por-producto (postergado)
+
+El MVP actual trabaja con **compras previstas por bloque** (concepto +
+monto, ej. "Supermercado semanal · $60.000"). Cargar producto por
+producto (leche, pan, detergente) sólo tiene sentido cuando se
+incorpore:
+
+- escaneo automático de ticket (visión → ítems),
+- OCR de factura B,
+- comparador de precios por comercio,
+- historial de productos frecuentes con sugerencias.
+
+Hasta que existan esas capacidades, el MVP **no** ofrece carga manual
+producto-por-producto: la fricción es alta y el valor para el usuario
+es bajo. Mantener la lógica simple a nivel bloque mejora la adopción.
+
 ## Fase 6 · Planes pagos y monetización
 
 **Objetivo**: convertir HogarIA en un negocio sostenible.

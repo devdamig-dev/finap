@@ -11,7 +11,7 @@ import {
 } from "react";
 import { bills as seedBills } from "@/lib/mock/bills";
 import { tasks as seedTasks } from "@/lib/mock/tasks";
-import { shoppingList as seedShopping } from "@/lib/mock/shopping";
+import { plannedPurchases as seedPurchases } from "@/lib/mock/planned-purchases";
 import { documents as seedDocuments } from "@/lib/mock/documents";
 import { accounts as seedAccounts } from "@/lib/mock/accounts";
 import { transactions as seedTransactions } from "@/lib/mock/transactions";
@@ -20,14 +20,13 @@ import type {
   Bill,
   HouseholdDocument,
   HouseholdTask,
-  ShoppingItem,
+  PlannedPurchase,
+  PlannedPurchaseStatus,
   Transaction,
 } from "@/lib/types";
 
 export interface PrivacySettings {
-  /** Si false: Finanzas/Dashboard ocultan totales por integrante. */
   personalDetailsVisible: boolean;
-  /** Si true: se comparten totales agregados por integrante. */
   shareAggregates: boolean;
 }
 
@@ -35,7 +34,7 @@ interface AppState {
   transactions: Transaction[];
   bills: Bill[];
   tasks: HouseholdTask[];
-  shopping: ShoppingItem[];
+  purchases: PlannedPurchase[];
   documents: HouseholdDocument[];
   accounts: Account[];
   privacy: PrivacySettings;
@@ -48,8 +47,8 @@ type Action =
   | { type: "ADD_BILL"; payload: Bill }
   | { type: "ADD_TASK"; payload: HouseholdTask }
   | { type: "TOGGLE_TASK"; payload: string }
-  | { type: "ADD_SHOPPING_ITEM"; payload: ShoppingItem }
-  | { type: "TOGGLE_SHOPPING_ITEM"; payload: string }
+  | { type: "ADD_PURCHASE"; payload: PlannedPurchase }
+  | { type: "SET_PURCHASE_STATUS"; payload: { id: string; status: PlannedPurchaseStatus; linkedTransactionId?: string } }
   | { type: "ADD_DOCUMENT"; payload: HouseholdDocument }
   | { type: "ADD_ACCOUNT"; payload: Account }
   | { type: "SET_PRIVACY"; payload: Partial<PrivacySettings> }
@@ -64,7 +63,7 @@ const initialState: AppState = {
   transactions: seedTransactions,
   bills: seedBills,
   tasks: seedTasks,
-  shopping: seedShopping,
+  purchases: seedPurchases,
   documents: seedDocuments,
   accounts: seedAccounts,
   privacy: DEFAULT_PRIVACY,
@@ -90,13 +89,20 @@ function reducer(state: AppState, action: Action): AppState {
             : t,
         ),
       };
-    case "ADD_SHOPPING_ITEM":
-      return { ...state, shopping: [action.payload, ...state.shopping] };
-    case "TOGGLE_SHOPPING_ITEM":
+    case "ADD_PURCHASE":
+      return { ...state, purchases: [action.payload, ...state.purchases] };
+    case "SET_PURCHASE_STATUS":
       return {
         ...state,
-        shopping: state.shopping.map((i) =>
-          i.id === action.payload ? { ...i, bought: !i.bought } : i,
+        purchases: state.purchases.map((p) =>
+          p.id === action.payload.id
+            ? {
+                ...p,
+                status: action.payload.status,
+                linkedTransactionId:
+                  action.payload.linkedTransactionId ?? p.linkedTransactionId,
+              }
+            : p,
         ),
       };
     case "ADD_DOCUMENT":
@@ -112,7 +118,29 @@ function reducer(state: AppState, action: Action): AppState {
   }
 }
 
-const STORAGE_KEY = "hogaria.store.v2";
+// Bump cuando cambia la forma del state (slice nuevo, etc.)
+const STORAGE_KEY = "hogaria.store.v3";
+
+/** Mapea la categoría de una compra prevista a la categoría del movimiento generado */
+function mapPurchaseCategory(
+  c: PlannedPurchase["category"],
+): Transaction["category"] {
+  switch (c) {
+    case "Supermercado":
+      return "Supermercado";
+    case "Farmacia":
+      return "Salud";
+    case "Escolar":
+      return "Educación";
+    case "Mascotas":
+      return "Mascotas";
+    case "Limpieza":
+    case "Hogar":
+    case "Otros":
+    default:
+      return "Hogar";
+  }
+}
 
 interface AppStoreApi {
   state: AppState;
@@ -120,8 +148,14 @@ interface AppStoreApi {
   addBill: (b: Bill) => void;
   addTask: (t: HouseholdTask) => void;
   toggleTask: (id: string) => void;
-  addShoppingItem: (i: ShoppingItem) => void;
-  toggleShoppingItem: (id: string) => void;
+  addPurchase: (p: PlannedPurchase) => void;
+  /**
+   * Marca una compra prevista como realizada y crea automáticamente el
+   * movimiento de gasto del hogar asociado. Devuelve el id de la
+   * transacción creada (o null si ya estaba realizada / cancelada).
+   */
+  completePurchase: (id: string, actualAmount?: number) => string | null;
+  cancelPurchase: (id: string) => void;
   addDocument: (d: HouseholdDocument) => void;
   addAccount: (a: Account) => void;
   setPrivacy: (p: Partial<PrivacySettings>) => void;
@@ -133,7 +167,6 @@ const StoreContext = createContext<AppStoreApi | null>(null);
 export function AppStoreProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  // Hidratar desde localStorage en cliente
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
@@ -149,7 +182,6 @@ export function AppStoreProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Persistir cuando cambia (después de hidratado)
   useEffect(() => {
     if (!state.hydrated || typeof window === "undefined") return;
     const { hydrated: _h, ...persistable } = state;
@@ -157,9 +189,37 @@ export function AppStoreProvider({ children }: { children: React.ReactNode }) {
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(persistable));
     } catch {
-      /* localStorage lleno o privacy mode — ignoramos */
+      /* ignore */
     }
   }, [state]);
+
+  const completePurchase = useCallback(
+    (id: string, actualAmount?: number): string | null => {
+      const purchase = state.purchases.find((p) => p.id === id);
+      if (!purchase || purchase.status !== "prevista") return null;
+
+      const amount = actualAmount ?? purchase.estimatedAmount;
+      const txId = `tx-${Date.now()}`;
+      const tx: Transaction = {
+        id: txId,
+        type: "gasto",
+        kind: "variable",
+        category: mapPurchaseCategory(purchase.category),
+        description: purchase.title,
+        amount,
+        date: new Date().toISOString(),
+        scope: "hogar",
+        paymentMethod: "debito",
+      };
+      dispatch({ type: "ADD_TRANSACTION", payload: tx });
+      dispatch({
+        type: "SET_PURCHASE_STATUS",
+        payload: { id, status: "realizada", linkedTransactionId: txId },
+      });
+      return txId;
+    },
+    [state.purchases],
+  );
 
   const api = useMemo<AppStoreApi>(
     () => ({
@@ -168,8 +228,10 @@ export function AppStoreProvider({ children }: { children: React.ReactNode }) {
       addBill: (b) => dispatch({ type: "ADD_BILL", payload: b }),
       addTask: (t) => dispatch({ type: "ADD_TASK", payload: t }),
       toggleTask: (id) => dispatch({ type: "TOGGLE_TASK", payload: id }),
-      addShoppingItem: (i) => dispatch({ type: "ADD_SHOPPING_ITEM", payload: i }),
-      toggleShoppingItem: (id) => dispatch({ type: "TOGGLE_SHOPPING_ITEM", payload: id }),
+      addPurchase: (p) => dispatch({ type: "ADD_PURCHASE", payload: p }),
+      completePurchase,
+      cancelPurchase: (id) =>
+        dispatch({ type: "SET_PURCHASE_STATUS", payload: { id, status: "cancelada" } }),
       addDocument: (d) => dispatch({ type: "ADD_DOCUMENT", payload: d }),
       addAccount: (a) => dispatch({ type: "ADD_ACCOUNT", payload: a }),
       setPrivacy: (p) => dispatch({ type: "SET_PRIVACY", payload: p }),
@@ -180,7 +242,7 @@ export function AppStoreProvider({ children }: { children: React.ReactNode }) {
         dispatch({ type: "RESET" });
       },
     }),
-    [state],
+    [state, completePurchase],
   );
 
   return <StoreContext.Provider value={api}>{children}</StoreContext.Provider>;
@@ -192,7 +254,6 @@ export function useAppStore(): AppStoreApi {
   return ctx;
 }
 
-/** Para componentes que sólo necesitan leer un slice */
 export function useTransactions() {
   return useAppStore().state.transactions;
 }
@@ -202,8 +263,8 @@ export function useBills() {
 export function useTasks() {
   return useAppStore().state.tasks;
 }
-export function useShopping() {
-  return useAppStore().state.shopping;
+export function usePurchases() {
+  return useAppStore().state.purchases;
 }
 export function useDocuments() {
   return useAppStore().state.documents;
@@ -215,7 +276,6 @@ export function usePrivacy() {
   return useAppStore().state.privacy;
 }
 
-/** Hook util: evita mismatch SSR/CSR */
 export function useHasHydrated() {
   const { state } = useAppStore();
   const [mounted, setMounted] = useState(false);

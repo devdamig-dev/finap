@@ -129,6 +129,12 @@ export interface Goal {
 
 export type ShoppingPriority = "baja" | "media" | "alta";
 
+/**
+ * @deprecated Reemplazado por `PlannedPurchase`. La carga producto por
+ * producto se mantiene como modelo posible para una fase futura con
+ * escaneo de ticket / OCR. El MVP actual trabaja con compras previstas
+ * por bloque (concepto + monto).
+ */
 export interface ShoppingItem {
   id: string;
   name: string;
@@ -138,6 +144,37 @@ export interface ShoppingItem {
   category: "Almacén" | "Limpieza" | "Frescos" | "Bebidas" | "Higiene" | "Otros";
   priority: ShoppingPriority;
   bought: boolean;
+}
+
+// =====================================================================
+// Compras previstas (bloques de compra, no items individuales)
+// =====================================================================
+
+export type PlannedPurchaseStatus = "prevista" | "realizada" | "cancelada";
+
+export type PlannedPurchaseCategory =
+  | "Supermercado"
+  | "Limpieza"
+  | "Farmacia"
+  | "Mascotas"
+  | "Hogar"
+  | "Escolar"
+  | "Otros";
+
+export interface PlannedPurchase {
+  id: string;
+  /** Concepto / título de la compra (ej: "Supermercado semanal") */
+  title: string;
+  category: PlannedPurchaseCategory;
+  /** Monto estimado (no necesariamente final) */
+  estimatedAmount: number;
+  /** Fecha prevista (cuándo se espera realizarla) */
+  plannedDate: string;
+  responsible?: string;
+  status: PlannedPurchaseStatus;
+  notes?: string;
+  /** Si se marca como realizada, id del movimiento generado en transacciones */
+  linkedTransactionId?: string;
 }
 
 export type MaintenanceStatus = "ok" | "proximo" | "atrasado";
