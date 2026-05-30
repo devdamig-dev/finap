@@ -7,6 +7,7 @@ import {
   Home as HomeIcon,
   Landmark,
   Lock,
+  RotateCcw,
   ShieldCheck,
   Tags,
   Users,
@@ -66,7 +67,7 @@ export default function ConfiguracionPage() {
   const { open } = useActions();
   const accounts = useAccounts();
   const privacy = usePrivacy();
-  const { setPrivacy } = useAppStore();
+  const { setPrivacy, reset } = useAppStore();
   const toast = useToast();
   return (
     <div className="space-y-5 animate-fade-in">
@@ -277,6 +278,30 @@ export default function ConfiguracionPage() {
           <Button variant="outline" size="sm">Exportar CSV</Button>
           <Button variant="outline" size="sm">Exportar PDF mensual</Button>
           <Button variant="outline" size="sm">Exportar patrimonio</Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <RotateCcw className="h-4 w-4" /> Resetear demo
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">
+            Borra todo lo que cargaste en esta sesión y vuelve a los datos seed.
+            Sólo afecta tu navegador.
+          </p>
+        </CardHeader>
+        <CardContent>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              reset();
+              toast.success("Demo reseteado", "Volvemos a los datos iniciales.");
+            }}
+          >
+            Borrar mis cambios locales
+          </Button>
         </CardContent>
       </Card>
 

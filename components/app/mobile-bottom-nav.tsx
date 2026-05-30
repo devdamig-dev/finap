@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { mobileNavItems } from "./nav-items";
 
+const NEW_HREFS = new Set(["/dashboard/mis-gastos"]);
+
 export function MobileBottomNav() {
   const pathname = usePathname();
 
@@ -17,17 +19,21 @@ export function MobileBottomNav() {
             item.href === "/dashboard"
               ? pathname === "/dashboard"
               : pathname.startsWith(item.href);
+          const isNew = NEW_HREFS.has(item.href);
           return (
             <li key={item.href}>
               <Link
                 href={item.href}
                 className={cn(
-                  "flex flex-col items-center justify-center gap-0.5 py-2 text-[10px] font-medium transition-colors",
+                  "relative flex flex-col items-center justify-center gap-0.5 py-2 text-[10px] font-medium transition-colors",
                   active ? "text-primary" : "text-muted-foreground",
                 )}
               >
                 <Icon className={cn("h-5 w-5", active && "scale-110")} />
                 {item.shortLabel ?? item.label}
+                {isNew && (
+                  <span className="absolute top-1 right-3 h-1.5 w-1.5 rounded-full bg-primary" />
+                )}
               </Link>
             </li>
           );

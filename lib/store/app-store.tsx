@@ -52,7 +52,8 @@ type Action =
   | { type: "TOGGLE_SHOPPING_ITEM"; payload: string }
   | { type: "ADD_DOCUMENT"; payload: HouseholdDocument }
   | { type: "ADD_ACCOUNT"; payload: Account }
-  | { type: "SET_PRIVACY"; payload: Partial<PrivacySettings> };
+  | { type: "SET_PRIVACY"; payload: Partial<PrivacySettings> }
+  | { type: "RESET" };
 
 const DEFAULT_PRIVACY: PrivacySettings = {
   personalDetailsVisible: false,
@@ -104,12 +105,14 @@ function reducer(state: AppState, action: Action): AppState {
       return { ...state, accounts: [action.payload, ...state.accounts] };
     case "SET_PRIVACY":
       return { ...state, privacy: { ...state.privacy, ...action.payload } };
+    case "RESET":
+      return { ...initialState, hydrated: true };
     default:
       return state;
   }
 }
 
-const STORAGE_KEY = "hogaria.store.v1";
+const STORAGE_KEY = "hogaria.store.v2";
 
 interface AppStoreApi {
   state: AppState;
@@ -122,6 +125,7 @@ interface AppStoreApi {
   addDocument: (d: HouseholdDocument) => void;
   addAccount: (a: Account) => void;
   setPrivacy: (p: Partial<PrivacySettings>) => void;
+  reset: () => void;
 }
 
 const StoreContext = createContext<AppStoreApi | null>(null);
@@ -169,6 +173,12 @@ export function AppStoreProvider({ children }: { children: React.ReactNode }) {
       addDocument: (d) => dispatch({ type: "ADD_DOCUMENT", payload: d }),
       addAccount: (a) => dispatch({ type: "ADD_ACCOUNT", payload: a }),
       setPrivacy: (p) => dispatch({ type: "SET_PRIVACY", payload: p }),
+      reset: () => {
+        if (typeof window !== "undefined") {
+          window.localStorage.removeItem(STORAGE_KEY);
+        }
+        dispatch({ type: "RESET" });
+      },
     }),
     [state],
   );
