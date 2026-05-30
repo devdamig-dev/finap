@@ -8,6 +8,7 @@ import { PersonalAggregatedCard } from "@/components/finance/personal-aggregated
 import { QuickActions } from "@/components/dashboard/quick-actions";
 import { SavingsMini } from "@/components/dashboard/savings-mini";
 import { UpcomingBillsList } from "@/components/dashboard/upcoming-bills-list";
+import { UpcomingPurchasesMini } from "@/components/dashboard/upcoming-purchases-mini";
 import { NetWorthCard } from "@/components/finance/net-worth-card";
 import { generateRecommendations } from "@/lib/ai/recommendations";
 import { household } from "@/lib/mock/household";
@@ -58,8 +59,12 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <HouseholdTasksList limit={5} />
-        <div className="space-y-3">
-          <p className="text-sm font-semibold tracking-tight px-1">Más recomendaciones</p>
+        <UpcomingPurchasesMini limit={4} />
+      </div>
+
+      <div>
+        <p className="text-sm font-semibold tracking-tight px-1 mb-2">Más recomendaciones</p>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
           {otherRecs.map((r) => (
             <AIRecommendationCard key={r.id} recommendation={r} />
           ))}
